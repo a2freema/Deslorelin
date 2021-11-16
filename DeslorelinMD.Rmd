@@ -1,6 +1,20 @@
 ---
-title: "Deslorelin SICB paper"
+title: "Effects of a GnRH agonist on giant pouched rat female sex behavior"
+author:
+  - Beverly Lo
+  - Bhupinder Singh
+  - Amit Hanandari-Levi
+  - Jackie Berman
+  - Alexandra Chaves
+  - Aumena Choudhry
+  - Angela Freeman
+  - Alexander Ophir
+date: "`r format(Sys.time(), '%B %d, %Y')`"
 output: pdf_document
+bibliography: ./library.bib
+csl: apa.csl
+abstract: stuff
+  
 ---
 
 ```{r setup, include=FALSE}
@@ -20,6 +34,8 @@ library(car)
 library(cowplot)
 library(dbplyr)
 library(dplyr)
+library(broom)
+
 
 ## Function for standard error
 serr <- function(x) sqrt(var(x,na.rm=TRUE)/length(na.omit(x)))
@@ -39,31 +55,54 @@ COLOR1 <- "#D98DE9"
 COLOR2 <- "#E9D98D"
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
-```
-
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+# Introduction
 
 
-```{r}
+
+## Methods
+
+### Animals
+ The animals used in this study included animals captured at our field site in Morogoro, Tanzania as adults, and their descendants that were born in our captive colony.
+ 
+### Implantation
+16 adult females were briefly anesthetized using isoflurane gas and then implanted with either a Deslorelin implant (n=8, Virbac,) or Vehicle implant (n=8 Virbac,) placed subcutaneously on the dorsal side of the animal just caudal to the shoulderblades and near the midline. All females were patent at the start of the experiment, except one that had reverted to non-patency one week prior to implantation. Animals were placed into two groups of 8 (4 Deslorelin and 4 Control in each group).
+
+### Physical examination
+We closely monitored vaginal patency of the female African giant pouched rats on a weekly
+basis with visual inspection assisted by a periodontal probe when the female was under anesthesia.
+We scored the measurements as either nonpatent (i.e., fused, with no opening in the skin), patent
+(i.e., unfused, with opening in the skin), or patent closed (i.e., unfused, with partial opening in the
+skin). While females were anesthetized, we weighed the rats and recorded nipple size and color.
+Nipple size was measured using a wire gauge measuring tool that included numerical
+measurements with decreasing diameter indicated by larger numbers. Nipple color was compared
+to the body color and recorded as bright pink, medium pink, or pale pink (Figure 2).
+
+### Behavior
+Scentarking trials were completed before implantation while females were patent, and at week 2 and 6 (1 and 5 weeks post implantation, respectively). These dates were chosen to coincide with predicted changes in circulating estradiol.
+
+Male choice tests were conducted near 6 months post implantation. 
+
+## Results
+
+#Patency
+We detected no effect of GnRH agonist on patency after 6 months of treatment. 
+
+# Nipples
+We detected no effect of Deslorelin on nipple size
+
+Deslorelin treatment did result in mass gain, as predicted.
+
+#Scent marking
+There was no effect of Deslorelin on the total investigation of the male mark, or on the number of scent marks or their size.
+
+# Behavior in social choice test
+
+Deslorelin treatment significantly impacted female behavior and male behavior towards the treated female.
+
+```{r, echo=FALSE}
 
 AMITdata <-read.csv("BEVdata.csv")
-summary(AMITdata)
+#summary(AMITdata)
 AMITdata$Trial <- as.factor(AMITdata$Trial)
 AMITdata$Sex <- as.factor(AMITdata$Sex)
 AMITdata$ID <- as.factor(AMITdata$ID)
@@ -73,6 +112,46 @@ AMITdata$PercentPOS <- AMITdata$Sniff.dur/AMITdata$Total.time.w.male*100
 
 #Remove one trial where both females were saline-treated (human error)
 AMITdata <-AMITdata[!(AMITdata$Trial=="1510959"),] 
+```
+
+
+
+
+```{r, echo=FALSE, results="hide", warning=FALSE, message=FALSE}
+### Statistics
+#1. Examine whether treatment affected interaction.
+Males <- AMITdata %>% filter(Sex=="M") #prevent double counting datapoints.
+
+#Because each male was only in one trial, lmer and lm are equivalent.
+fit1 <- lmer(Total.time.w.male ~ Status + (1|Trial), data=Males)
+anova(fit1)
+fit1a <- summary(fit1)
+lm(Total.time.w.male ~ Status, data=Males)
+InteractingAnova <- anova(lm(Total.time.w.male ~ Status, data=Males))
+
+#2. Does status predict aggression time?
+fit2 <- lmer(PercentAGG ~ Status * Sex + (1|Trial), data=AMITdata)
+anova(fit2)
+fit2.emm <- emmeans(fit2,  ~  Status*Sex)
+#qqnorm(resid(fit2))
+#qqline(resid(fit2))
+
+#3. Does status predict sniffing time?
+fit3 <- lmer(PercentPOS ~ Status * Sex + (1|Trial), data=AMITdata)
+anova(fit3)
+fit3.emm <- emmeans(fit3,  ~  Status*Sex)
+#qqnorm(resid(fit3))
+#qqline(resid(fit3))
+```
+*The time the male and Saline-treated female spent interacting together was greater than the time the male and Deslorelin-treated female spent together.*
+Mean time spent interacting Deslorelin and male: Control and male: , t = `r round(fit1a$coefficients[2,4], digits= 3)`, p = `r round(fit1a$coefficients[2,5], digits= 4)`.
+ however, this was no longer significant after corrections for multiple comparisons (adjusted $\alpha$ = 0.001)
+
+
+
+```{r, echo=FALSE}
+
+
 
 ### First plot, Male aggression towards females ###
 plotdata <- AMITdata %>% filter(ID=="Male") %>% group_by(Status) %>% mutate(meanagg = mean(Aggression.dur), stanaggerr = serr(Aggression.dur))  
@@ -379,28 +458,11 @@ plot_grid(INTERACTplot, NULL, plotPOS, plotPOSM, nrow=2, rel_widths = c(2, 2))
 ggsave("Sniff Panel percent.png", width=8, height=3, dpi=600) #save panel locally
 
 
-### Statistics
-#1. Examine whether treatment affected interaction.
-Males <- AMITdata %>% filter(Sex=="M") #prevent double counting datapoints.
-
-#Because each male was only in one trial, lmer and lm are equivalent.
-fit1 <- lmer(Total.time.w.male ~ Status + (1|Trial), data=Males)
-anova(fit1)
-lm(Total.time.w.male ~ Status, data=Males)
-anova(lm(Total.time.w.male ~ Status, data=Males))
-
-#2. Does status predict aggression time?
-fit2 <- lmer(PercentAGG ~ Status * Sex + (1|Trial), data=AMITdata)
-anova(fit2)
-fit2.emm <- emmeans(fit2,  ~  Status*Sex)
-qqnorm(resid(fit2))
-qqline(resid(fit2))
-
-#3. Does status predict sniffing time?
-fit3 <- lmer(PercentPOS ~ Status * Sex + (1|Trial), data=AMITdata)
-anova(fit3)
-fit3.emm <- emmeans(fit3,  ~  Status*Sex)
-qqnorm(resid(fit3))
-qqline(resid(fit3))
 
 ```
+
+
+
+## Discussion
+
+
