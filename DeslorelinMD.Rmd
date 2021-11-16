@@ -1,0 +1,406 @@
+---
+title: "Deslorelin SICB paper"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#setwd("/Users/afreeman/Desktop")
+getwd()
+
+#load all libraries
+library(ade4)
+library(ade4TkGUI)
+library(ggplot2)
+library(ggthemes)
+library(lme4)
+library(lmerTest)
+library(emmeans)
+library(car)
+library(cowplot)
+library(dbplyr)
+library(dplyr)
+
+## Function for standard error
+serr <- function(x) sqrt(var(x,na.rm=TRUE)/length(na.omit(x)))
+
+##Theme for plots
+theme_alex <- function(base_size=24, base_family ="Arial") {
+  theme_few() %+replace%
+    theme(axis.ticks = element_blank(), legend.title=element_text(size=24, face="bold"), 
+          axis.title=element_text(size=24,face="bold"),
+          axis.line = element_line(colour = "black"),
+          panel.border = element_blank(),
+          legend.position = "right")
+  
+}
+
+COLOR1 <- "#D98DE9"
+COLOR2 <- "#E9D98D"
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+
+```{r}
+
+AMITdata <-read.csv("BEVdata.csv")
+summary(AMITdata)
+AMITdata$Trial <- as.factor(AMITdata$Trial)
+AMITdata$Sex <- as.factor(AMITdata$Sex)
+AMITdata$ID <- as.factor(AMITdata$ID)
+AMITdata$Status <- as.factor(AMITdata$Status)
+AMITdata$PercentAGG <- AMITdata$Aggression.dur/AMITdata$Total.time.w.male*100
+AMITdata$PercentPOS <- AMITdata$Sniff.dur/AMITdata$Total.time.w.male*100
+
+#Remove one trial where both females were saline-treated (human error)
+AMITdata <-AMITdata[!(AMITdata$Trial=="1510959"),] 
+
+### First plot, Male aggression towards females ###
+plotdata <- AMITdata %>% filter(ID=="Male") %>% group_by(Status) %>% mutate(meanagg = mean(Aggression.dur), stanaggerr = serr(Aggression.dur))  
+
+aggplot1 <- ggplot(plotdata, aes(x=Status, y=Aggression.dur, fill= Status)) +
+  scale_y_continuous(expand= c(0,0), limits = c(0, 40)) +
+  #coord_cartesian(ylim = c(0, 10)) +
+  geom_jitter(aes(color = (as.factor(Status))), size = 2, position=position_dodge(width=0.9), alpha=0.5) +
+  geom_bar(aes(color = as.factor(Status)), alpha = .5,
+           width=0.8,
+           stat="summary", size = 1, position="dodge") +
+  geom_errorbar(aes(ymin=meanagg-stanaggerr, ymax=meanagg+stanaggerr, color = as.factor(Status)), width=.4,
+                position=position_dodge(.9)) +
+  labs(x = "Implant Status", y="Male aggression towards females \n duration (s) ± SE")+ #Axes labels
+  theme_alex() +
+  scale_fill_manual(values=c(COLOR1, COLOR2)) + #colors in hexadecimal 
+  scale_color_manual(values=c("Black", "Black")) + #colors in hexadecimal 
+  # annotate("segment", x = 1, xend = 4, y = 40, yend = 40, colour = "black", size=1, alpha=1) +
+  #annotate("text", x = 2.5, y = 41.5, size =6, label = "**") +
+  #annotate("segment", x = 1, xend = 3, y = 35, yend = 35, colour = "black", size=1, alpha=1) +
+  #annotate("text", x = 2, y = 36.5, size =6, label = "*") +
+  guides(fill="none", color = "none") +
+  theme(legend.title=element_text(size=8, face="bold"), 
+        legend.text = element_text(size=8),
+        axis.text = element_text(size=7, colour="black"),
+        axis.title=element_text(size=8,face="bold"),
+        axis.line = element_line(colour = "black"),
+        panel.border = element_blank(),
+        legend.position = "right"
+  )
+aggplot1 #show plot
+
+##### How much did males spend sniffing females ###
+
+plotdata2 <- AMITdata %>% filter(ID=="Male") %>% group_by(Status) %>% mutate(meansniff = mean(Sniff.dur), stanSnifferr = serr(Sniff.dur))  
+
+sniffplot1 <- ggplot(plotdata2, aes(x=Status, y=Sniff.dur, fill= Status)) +
+  scale_y_continuous(expand= c(0,0), limits = c(0, 250)) +
+  #coord_cartesian(ylim = c(0, 10)) +
+  geom_jitter(aes(color = (as.factor(Status))), size = 2, position=position_dodge(width=0.9), alpha=0.5) +
+  geom_bar(aes(color = as.factor(Status)), alpha = .5,
+           width=0.8,
+           stat="summary", size = 1, position="dodge") +
+  geom_errorbar(aes(ymin=meansniff-stanSnifferr, ymax=meansniff+stanSnifferr, color = as.factor(Status)), width=.4,
+                position=position_dodge(.9)) +
+  labs(x = "Implant Status", y="Male sniffing towards females \n duration (s) ± SE")+ #Axes labels
+  theme_alex() +
+  scale_fill_manual(values=c(COLOR1, COLOR2)) + #colors in hexadecimal 
+  scale_color_manual(values=c("Black", "Black")) + #colors in hexadecimal 
+  # annotate("segment", x = 1, xend = 4, y = 40, yend = 40, colour = "black", size=1, alpha=1) +
+  #annotate("text", x = 2.5, y = 41.5, size =6, label = "**") +
+  #annotate("segment", x = 1, xend = 3, y = 35, yend = 35, colour = "black", size=1, alpha=1) +
+  #annotate("text", x = 2, y = 36.5, size =6, label = "*") +
+  guides(fill="none", color = "none") +
+  theme(legend.title=element_text(size=8, face="bold"), 
+        legend.text = element_text(size=8),
+        axis.text = element_text(size=7, colour="black"),
+        axis.title=element_text(size=8,face="bold"),
+        axis.line = element_line(colour = "black"),
+        panel.border = element_blank(),
+        legend.position = "right"
+  )
+sniffplot1 #show plot
+
+### Association time ###
+
+plotdataINTERACT <- AMITdata %>% filter(ID=="Male") %>% group_by(Status) %>% mutate(meaninteract = mean(Total.time.w.male), stanInteracterr = serr(Total.time.w.male))  
+
+INTERACTplot <- ggplot(plotdataINTERACT, aes(x=Status, y=Total.time.w.male, fill= Status)) +
+  scale_y_continuous(expand= c(0,0), limits = c(0, 1000)) +
+  #coord_cartesian(ylim = c(0, 10)) +
+  geom_jitter(aes(color = (as.factor(Status))), size = 2, position=position_dodge(width=0.9), alpha=0.5) +
+  geom_bar(aes(color = as.factor(Status)), alpha = .5,
+           width=0.8,
+           stat="summary", size = 1, position="dodge") +
+  geom_errorbar(aes(ymin=meaninteract-stanInteracterr, ymax=meaninteract+stanInteracterr, color = as.factor(Status)), width=.4,
+                position=position_dodge(.9)) +
+  labs(x = "Implant Status", y="Time spent interacting (s) ? SE")+ #Axes labels
+  theme_alex() +
+  scale_fill_manual(values=c(COLOR1, COLOR2)) + #colors in hexadecimal 
+  scale_color_manual(values=c("Black", "Black")) + #colors in hexadecimal 
+  # annotate("segment", x = 1, xend = 4, y = 40, yend = 40, colour = "black", size=1, alpha=1) +
+  #annotate("text", x = 2.5, y = 41.5, size =6, label = "**") +
+  #annotate("segment", x = 1, xend = 3, y = 35, yend = 35, colour = "black", size=1, alpha=1) +
+  #annotate("text", x = 2, y = 36.5, size =6, label = "*") +
+  guides(fill="none", color = "none") +
+  theme(legend.title=element_text(size=8, face="bold"), 
+        legend.text = element_text(size=8),
+        axis.text = element_text(size=9, colour="black"),
+        axis.title=element_text(size=9,face="bold"),
+        axis.line = element_line(colour = "black"),
+        panel.border = element_blank(),
+        legend.position = "right"
+  )
+INTERACTplot #show plot
+ggsave("Interaction Plot.png", width=4, height=4, dpi=600)
+
+### Female Aggression ####
+plotdataF1 <- AMITdata %>% filter(Sex=="F") %>% group_by(Status) %>% mutate(meanagg = mean(Aggression.dur), stanaggerr = serr(Aggression.dur))  
+
+aggplot2 <- ggplot(plotdataF1, aes(x=Status, y=Aggression.dur, fill= Status)) +
+  scale_y_continuous(expand= c(0,0), limits = c(0, 40)) +
+  #coord_cartesian(ylim = c(0, 10)) +
+  geom_jitter(aes(color = (as.factor(Status))), size = 2, position=position_dodge(width=0.9), alpha=0.5) +
+  geom_bar(aes(color = as.factor(Status)), alpha = .5,
+           width=0.8,
+           stat="summary", size = 1, position="dodge") +
+  geom_errorbar(aes(ymin=meanagg-stanaggerr, ymax=meanagg+stanaggerr, color = as.factor(Status)), width=.4,
+                position=position_dodge(.9)) +
+  labs(x = "Implant Status", y="Female aggression towards male \n duration (s) ± SE")+ #Axes labels
+  theme_alex() +
+  scale_fill_manual(values=c(COLOR1, COLOR2)) + #colors in hexadecimal 
+  scale_color_manual(values=c("Black", "Black")) + #colors in hexadecimal 
+  # annotate("segment", x = 1, xend = 4, y = 40, yend = 40, colour = "black", size=1, alpha=1) +
+  #annotate("text", x = 2.5, y = 41.5, size =6, label = "**") +
+  #annotate("segment", x = 1, xend = 3, y = 35, yend = 35, colour = "black", size=1, alpha=1) +
+  #annotate("text", x = 2, y = 36.5, size =6, label = "*") +
+  guides(fill="none", color = "none") +
+  theme(legend.title=element_text(size=8, face="bold"), 
+        legend.text = element_text(size=8),
+        axis.text = element_text(size=7, colour="black"),
+        axis.title=element_text(size=8,face="bold"),
+        axis.line = element_line(colour = "black"),
+        panel.border = element_blank(),
+        legend.position = "right"
+  )
+aggplot2 #show plot
+
+##Female Sniffing###
+
+plotdataF2 <- AMITdata %>% filter(Sex=="F") %>% group_by(Status) %>% mutate(meansniff = mean(Sniff.dur), stanSnifferr = serr(Sniff.dur))  
+
+sniffplotF1 <- ggplot(plotdataF2, aes(x=Status, y=Sniff.dur, fill= Status)) +
+  scale_y_continuous(expand= c(0,0), limits = c(0, 250)) +
+  #coord_cartesian(ylim = c(0, 10)) +
+  geom_jitter(aes(color = (as.factor(Status))), size = 2, position=position_dodge(width=0.9), alpha=0.5) +
+  geom_bar(aes(color = as.factor(Status)), alpha = .5,
+           width=0.8,
+           stat="summary", size = 1, position="dodge") +
+  geom_errorbar(aes(ymin=meansniff-stanSnifferr, ymax=meansniff+stanSnifferr, color = as.factor(Status)), width=.4,
+                position=position_dodge(.9)) +
+  labs(x = "Implant Status", y="Female sniffing towards male \n duration (s) ± SE")+ #Axes labels
+  theme_alex() +
+  scale_fill_manual(values=c(COLOR1, COLOR2)) + #colors in hexadecimal 
+  scale_color_manual(values=c("Black", "Black")) + #colors in hexadecimal 
+  # annotate("segment", x = 1, xend = 4, y = 40, yend = 40, colour = "black", size=1, alpha=1) +
+  #annotate("text", x = 2.5, y = 41.5, size =6, label = "**") +
+  #annotate("segment", x = 1, xend = 3, y = 35, yend = 35, colour = "black", size=1, alpha=1) +
+  #annotate("text", x = 2, y = 36.5, size =6, label = "*") +
+  guides(fill="none", color = "none") +
+  theme(legend.title=element_text(size=8, face="bold"), 
+        legend.text = element_text(size=8),
+        axis.text = element_text(size=7, colour="black"),
+        axis.title=element_text(size=8,face="bold"),
+        axis.line = element_line(colour = "black"),
+        panel.border = element_blank(),
+        legend.position = "right"
+  )
+sniffplotF1 #show plot
+
+##
+plot_grid(INTERACTplot, NULL, aggplot1, aggplot2, nrow=2, rel_widths = c(2, 2))
+ggsave("Aggression Panel.png", width=8, height=3, dpi=600) #save panel locally
+
+plot_grid(INTERACTplot, NULL, sniffplot1, sniffplotF1, nrow=2, rel_widths = c(2, 2))
+ggsave("Sniff Panel.png", width=8, height=3, dpi=600) #save panel locally
+
+
+### Percentage plots ##
+
+plotPositive <- AMITdata %>% filter(Sex=="F") %>% group_by(Status) %>% mutate(mean1 = mean(PercentPOS), stanerr1 = serr(PercentPOS))  
+
+plotPOS <- ggplot(plotPositive, aes(x=Status, y=PercentPOS, fill= Status)) +
+  scale_y_continuous(expand= c(0,0), limits = c(0, 100)) +
+  #coord_cartesian(ylim = c(0, 10)) +
+  geom_jitter(aes(color = (as.factor(Status))), size = 2, position=position_dodge(width=0.9), alpha=0.5) +
+  geom_bar(aes(color = as.factor(Status)), alpha = .5,
+           width=0.8,
+           stat="summary", size = 1, position="dodge") +
+  geom_errorbar(aes(ymin=mean1-stanerr1, ymax=mean1+stanerr1, color = as.factor(Status)), width=.4,
+                position=position_dodge(.9)) +
+  labs(x = "Implant Status", y="Percent of Interaction time \n with female sniffing")+ #Axes labels
+  theme_alex() +
+  scale_fill_manual(values=c(COLOR1, COLOR2)) + #colors in hexadecimal 
+  scale_color_manual(values=c("Black", "Black")) + #colors in hexadecimal 
+  # annotate("segment", x = 1, xend = 4, y = 40, yend = 40, colour = "black", size=1, alpha=1) +
+  #annotate("text", x = 2.5, y = 41.5, size =6, label = "**") +
+  #annotate("segment", x = 1, xend = 3, y = 35, yend = 35, colour = "black", size=1, alpha=1) +
+  #annotate("text", x = 2, y = 36.5, size =6, label = "*") +
+  guides(fill="none", color = "none") +
+  theme(legend.title=element_text(size=8, face="bold"), 
+        legend.text = element_text(size=8),
+        axis.text = element_text(size=7, colour="black"),
+        axis.title=element_text(size=8,face="bold"),
+        axis.line = element_line(colour = "black"),
+        panel.border = element_blank(),
+        legend.position = "right"
+  )
+plotPOS #show plot
+
+
+
+plotAggressive <- AMITdata %>% filter(Sex=="F") %>% group_by(Status) %>% mutate(mean1 = mean(PercentAGG), stanerr1 = serr(PercentAGG))  
+
+plotAGG <- ggplot(plotAggressive, aes(x=Status, y=PercentAGG, fill= Status)) +
+  scale_y_continuous(expand= c(0,0), limits = c(0, 30)) +
+  #coord_cartesian(ylim = c(0, 10)) +
+  geom_jitter(aes(color = (as.factor(Status))), size = 2, position=position_dodge(width=0.9), alpha=0.5) +
+  geom_bar(aes(color = as.factor(Status)), alpha = .5,
+           width=0.8,
+           stat="summary", size = 1, position="dodge") +
+  geom_errorbar(aes(ymin=mean1-stanerr1, ymax=mean1+stanerr1, color = as.factor(Status)), width=.4,
+                position=position_dodge(.9)) +
+  labs(x = "Implant Status", y="Percent of Interaction time \n with female aggression")+ #Axes labels
+  theme_alex() +
+  scale_fill_manual(values=c(COLOR1, COLOR2)) + #colors in hexadecimal 
+  scale_color_manual(values=c("Black", "Black")) + #colors in hexadecimal 
+  # annotate("segment", x = 1, xend = 4, y = 40, yend = 40, colour = "black", size=1, alpha=1) +
+  #annotate("text", x = 2.5, y = 41.5, size =6, label = "**") +
+  #annotate("segment", x = 1, xend = 3, y = 35, yend = 35, colour = "black", size=1, alpha=1) +
+  #annotate("text", x = 2, y = 36.5, size =6, label = "*") +
+  guides(fill="none", color = "none") +
+  theme(legend.title=element_text(size=8, face="bold"), 
+        legend.text = element_text(size=8),
+        axis.text = element_text(size=9, colour="black"),
+        axis.title=element_text(size=9,face="bold"),
+        axis.line = element_line(colour = "black"),
+        panel.border = element_blank(),
+        legend.position = "right"
+  )
+plotAGG #show plot
+ggsave("Aggression Plot2.png", width=4, height=4, dpi=600) #save panel locally
+
+### Percentage plots male ##
+
+
+plotPositiveM <- AMITdata %>% filter(Sex=="M") %>% group_by(Status) %>% mutate(mean1 = mean(PercentPOS), stanerr1 = serr(PercentPOS))  
+
+plotPOSM <- ggplot(plotPositiveM, aes(x=Status, y=PercentPOS, fill= Status)) +
+  scale_y_continuous(expand= c(0,0), limits = c(0, 100)) +
+  #coord_cartesian(ylim = c(0, 10)) +
+  geom_jitter(aes(color = (as.factor(Status))), size = 2, position=position_dodge(width=0.9), alpha=0.5) +
+  geom_bar(aes(color = as.factor(Status)), alpha = .5,
+           width=0.8,
+           stat="summary", size = 1, position="dodge") +
+  geom_errorbar(aes(ymin=mean1-stanerr1, ymax=mean1+stanerr1, color = as.factor(Status)), width=.4,
+                position=position_dodge(.9)) +
+  labs(x = "Implant Status", y="Percent of Interaction time \n with male sniffing")+ #Axes labels
+  theme_alex() +
+  scale_fill_manual(values=c(COLOR1, COLOR2)) + #colors in hexadecimal 
+  scale_color_manual(values=c("Black", "Black")) + #colors in hexadecimal 
+  # annotate("segment", x = 1, xend = 4, y = 40, yend = 40, colour = "black", size=1, alpha=1) +
+  #annotate("text", x = 2.5, y = 41.5, size =6, label = "**") +
+  #annotate("segment", x = 1, xend = 3, y = 35, yend = 35, colour = "black", size=1, alpha=1) +
+  #annotate("text", x = 2, y = 36.5, size =6, label = "*") +
+  guides(fill="none", color = "none") +
+  theme(legend.title=element_text(size=8, face="bold"), 
+        legend.text = element_text(size=8),
+        axis.text = element_text(size=7, colour="black"),
+        axis.title=element_text(size=8,face="bold"),
+        axis.line = element_line(colour = "black"),
+        panel.border = element_blank(),
+        legend.position = "right"
+  )
+plotPOSM #show plot
+
+
+
+plotAggressiveM <- AMITdata %>% filter(Sex=="M") %>% group_by(Status) %>% mutate(mean1 = mean(PercentAGG), stanerr1 = serr(PercentAGG))  
+
+plotAGGM <- ggplot(plotAggressiveM, aes(x=Status, y=PercentAGG, fill= Status)) +
+  scale_y_continuous(expand= c(0,0), limits = c(0, 30)) +
+  #coord_cartesian(ylim = c(0, 10)) +
+  geom_jitter(aes(color = (as.factor(Status))), size = 2, position=position_dodge(width=0.9), alpha=0.5) +
+  geom_bar(aes(color = as.factor(Status)), alpha = .5,
+           width=0.8,
+           stat="summary", size = 1, position="dodge") +
+  geom_errorbar(aes(ymin=mean1-stanerr1, ymax=mean1+stanerr1, color = as.factor(Status)), width=.4,
+                position=position_dodge(.9)) +
+  labs(x = "Implant Status", y="Percent of Interaction time \n with male aggression")+ #Axes labels
+  theme_alex() +
+  scale_fill_manual(values=c(COLOR1, COLOR2)) + #colors in hexadecimal 
+  scale_color_manual(values=c("Black", "Black")) + #colors in hexadecimal 
+  # annotate("segment", x = 1, xend = 4, y = 40, yend = 40, colour = "black", size=1, alpha=1) +
+  #annotate("text", x = 2.5, y = 41.5, size =6, label = "**") +
+  #annotate("segment", x = 1, xend = 3, y = 35, yend = 35, colour = "black", size=1, alpha=1) +
+  #annotate("text", x = 2, y = 36.5, size =6, label = "*") +
+  guides(fill="none", color = "none") +
+  theme(legend.title=element_text(size=8, face="bold"), 
+        legend.text = element_text(size=8),
+        axis.text = element_text(size=9, colour="black"),
+        axis.title=element_text(size=9,face="bold"),
+        axis.line = element_line(colour = "black"),
+        panel.border = element_blank(),
+        legend.position = "right"
+  )
+plotAGGM #show plot
+ggsave("Aggression Panel percent2.png", width=4, height=4, dpi=600)
+
+plot_grid(INTERACTplot, NULL, plotAGG, plotAGGM, nrow=2, rel_widths = c(2, 2))
+ggsave("Aggression Panel percent.png", width=8, height=3, dpi=600) #save panel locally
+
+plot_grid(INTERACTplot, NULL, plotPOS, plotPOSM, nrow=2, rel_widths = c(2, 2))
+ggsave("Sniff Panel percent.png", width=8, height=3, dpi=600) #save panel locally
+
+
+### Statistics
+#1. Examine whether treatment affected interaction.
+Males <- AMITdata %>% filter(Sex=="M") #prevent double counting datapoints.
+
+#Because each male was only in one trial, lmer and lm are equivalent.
+fit1 <- lmer(Total.time.w.male ~ Status + (1|Trial), data=Males)
+anova(fit1)
+lm(Total.time.w.male ~ Status, data=Males)
+anova(lm(Total.time.w.male ~ Status, data=Males))
+
+#2. Does status predict aggression time?
+fit2 <- lmer(PercentAGG ~ Status * Sex + (1|Trial), data=AMITdata)
+anova(fit2)
+fit2.emm <- emmeans(fit2,  ~  Status*Sex)
+qqnorm(resid(fit2))
+qqline(resid(fit2))
+
+#3. Does status predict sniffing time?
+fit3 <- lmer(PercentPOS ~ Status * Sex + (1|Trial), data=AMITdata)
+anova(fit3)
+fit3.emm <- emmeans(fit3,  ~  Status*Sex)
+qqnorm(resid(fit3))
+qqline(resid(fit3))
+
+```
