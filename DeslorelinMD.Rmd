@@ -1,21 +1,82 @@
 ---
 title: "Effects of a GnRH agonist on giant pouched rat female sex behavior"
+date: "`r Sys.Date()`"
 author:
-  - Beverly Lo
-  - Bhupinder Singh
-  - Amit Hanandari-Levi
-  - Jackie Berman
-  - Alexandra Chaves
-  - Aumena Choudhry
-  - Angela Freeman
-  - Alexander Ophir
-date: "`r format(Sys.time(), '%B %d, %Y')`"
-output: pdf_document
-bibliography: ./library.bib
-csl: apa.csl
-abstract: stuff
-  
+  - name: Beverly Lo
+    email: blo
+    corresponding_author: no
+    affiliation:
+      - Cornell
+  - name: Bhupinder Singh
+    email: bob@example.com
+    affiliation: 
+      - Vetschool
+    footnote: 1 # Footnote using reference
+  - name: Amit Hanandari-Levi
+    email: cat@anotheru.edu
+    affiliation: Cornell
+    footnote:
+        - 1
+  - name: Jackie Berman
+    email: cat@anotheru.edu
+    affiliation: Cornell
+  - name: Alexandra Chaves
+    email: cat@anotheru.edu
+    affiliation: Cornell
+  - name: Aumena Choudhry
+    email: cat@anotheru.edu
+    affiliation: Cornell
+  - name: Angela Freeman
+    corresponding_author: yes
+    affiliation: 
+      - Cornell
+      - Salisbury
+  - name: Alexander Ophir
+    affiliation: Cornell 
+address:
+  - code: Cornell
+    address: Cornell University, Department of Psychology, Ithaca, NY, 14853
+  - code: Vetschool
+    address: Cornell University, Department of Veterinary Medicine, Ithaca, NY, 14853
+  - code: Salisbury
+    address: Salisbury University, Department of Biological Sciences, Salisbury, MD 21853
+footnote:
+  - code: 1
+    text: "Equal contribution"
+  - code: 2
+    text: "Current email address: \\href{mailto:cat@example.com}{cat@example.com}"
+
+abstract: |
+  This is the abstract.
+
+  It consists of two paragraphs.
+acknowledgements: |
+  This is an acknowledgement.
+
+  It consists of two paragraphs.
+keywords:
+  - key
+  - dictionary
+  - word
+fontsize: 10pt
+#spacing: halfline # could also be oneline
+#classoptions:
+#  - endnotes
+bibliography:  ./library.bib
+#csl: apa.csl
+#link-citations: yes
+output: rticles::oup_article
+#urlcolor: orange
+#linkcolor: green
+#citecolor: red
+#header-includes:
+#  - \usepackage[nomarkers,tablesfirst]{endfloat} # For figures and tables at end
+#  - \usepackage{lineno} # For line numbering
+#  - \linenumbers # For line numbering
 ---
+
+
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -35,6 +96,8 @@ library(cowplot)
 library(dbplyr)
 library(dplyr)
 library(broom)
+library("ggpubr")
+
 
 
 ## Function for standard error
@@ -92,7 +155,7 @@ We detected no effect of Deslorelin on nipple size
 
 Deslorelin treatment did result in mass gain, as predicted.
 
-#Scent marking
+# Scent marking
 There was no effect of Deslorelin on the total investigation of the male mark, or on the number of scent marks or their size.
 
 # Behavior in social choice test
@@ -100,6 +163,8 @@ There was no effect of Deslorelin on the total investigation of the male mark, o
 Deslorelin treatment significantly impacted female behavior and male behavior towards the treated female.
 
 ```{r, echo=FALSE}
+
+beverly <- read.csv("Beverlydata.csv")
 
 AMITdata <-read.csv("BEVdata.csv")
 #summary(AMITdata)
@@ -114,6 +179,152 @@ AMITdata$PercentPOS <- AMITdata$Sniff.dur/AMITdata$Total.time.w.male*100
 AMITdata <-AMITdata[!(AMITdata$Trial=="1510959"),] 
 ```
 
+```{r, echo=FALSE, warning = FALSE}
+#head(beverly) #this will show you the first few lines to make sure it's loaded
+#summary(beverly) #make sure there are all three timepoints, 13 pre, 16 week 2, 16 week 6
+
+#The following are the linear models and anovas
+beverly$ID <- as.factor(beverly$ID)
+
+#sniffing duration
+model.sniff <- lmer(Sniff_dur ~ Treatment*Timepoint +(1|ID), data=beverly)
+summary(model.sniff)
+anova(model.sniff)
+
+#licking the scent
+model.lick <- lmer(Lickscent_dur ~ Treatment*Timepoint +(1|ID), data=beverly)
+summary(model.lick)
+anova(model.lick)
+
+#saliva/chewing area
+model.salarea <- lmer(Saliva_area ~ Treatment*Timepoint +(1|ID), data=beverly)
+summary(model.salarea)
+anova(model.salarea)
+
+#urine area
+model.urarea <- lmer(Urine_area ~ Treatment*Timepoint +(1|ID), data=beverly)
+summary(model.urarea)
+anova(model.urarea)
+
+#Anogenital rubbing
+model.agrub <- lmer(AG_rubbing_dur~ Treatment*Timepoint +(1|ID), data=beverly)
+summary(model.agrub)
+anova(model.agrub)
+
+#grooming duration
+model.groom <- lmer(Groom_dur ~ Treatment*Timepoint +(1|ID), data=beverly)
+summary(model.groom)
+anova(model.groom)
+
+#for count data, we use negative binomial distributions, 
+#since these are not 'normal' distribution data
+model.urcount <- glmer.nb(Urine_count ~ Treatment*Timepoint +(1|ID), data=beverly)
+summary(model.urcount)
+anova(model.urcount)
+
+#this is for post-hoc testing
+
+emmip(model.urcount,Treatment~Timepoint)
+emmeans(model.urcount, pairwise~Treatment|Timepoint)
+
+#for count data, we use negative binomial distributions, 
+#since these are not 'normal' distribution data
+model.salcount <- glmer.nb(Saliva_count ~ Treatment*Timepoint +(1|ID), data=beverly)
+summary(model.salcount)
+anova(model.salcount)
+
+emmip(model.salcount,Treatment~Timepoint)
+emmeans(model.salcount, pairwise~Treatment|Timepoint)
+
+## make an investigation variable
+beverly$investigate <- beverly$Lickscent_dur + beverly$Sniff_dur
+
+#anova for investigation
+model.invest <- lmer(investigate ~ Treatment*Timepoint +(1|ID), data=beverly)
+summary(model.invest)
+anova(model.invest)
+
+
+## Following for boxplots
+ggboxplot(beverly, x = "Timepoint", y = "investigate", 
+          fill = "Treatment", palette = c("#ADD8E6", "#00688B"),
+          lwd=1,
+          ylab = "Duration of investigation (s)", xlab = "Timepoint")+
+  theme_alex()
+
+
+ggboxplot(beverly, x = "Timepoint", y = "Urine_area", 
+          fill = "Treatment", palette = c("#ADD8E6", "#00688B"),
+          lwd=1,
+          ylab = "Area of urine mark (cm2)", xlab = "Timepoint")+
+  theme_alex()
+
+
+ggboxplot(beverly, x = "Timepoint", y = "Groom_dur", 
+          fill = "Treatment", palette = c("#ADD8E6", "#00688B"),
+          lwd=1,
+          ylab = "Grooming duration (s)", xlab = "Timepoint")+
+  theme_alex()
+
+
+ggboxplot(beverly, x = "Timepoint", y = "Urine_count", 
+          fill = "Treatment", palette = c("#ADD8E6", "#00688B"),
+          lwd=1,
+          ylab = "Urine marking counts", xlab = "Timepoint")+
+  theme_alex()
+
+ggboxplot(beverly, x = "Timepoint", y = "AG_rubbing_dur", 
+          fill = "Treatment", palette = c("#ADD8E6", "#00688B"),
+          lwd=1,
+          ylab = "Anogenital rubbing duration (s)", xlab = "Timepoint")+
+  theme_alex()
+
+#following for line plots
+ggplot(data = beverly, aes(x = Timepoint, y = investigate, group = ID, color = Treatment, fill=Treatment)) + 
+  geom_line() + 
+  geom_point(shape = 21, size = 3, color="black") + 
+  xlab("Test Time") + 
+  ylab("Investigation time (s)") + 
+  scale_fill_manual(values = c("#ADD8E6", "#00688B")) +
+  scale_color_manual(values = c("#ADD8E6", "#00688B")) +
+  theme_alex()
+ggsave("Investigation (sniff and lick).png", width=8, height=6, dpi=600)
+
+
+ggplot(data = beverly, aes(x = Timepoint, y = Groom_dur, group = ID, color = Treatment, fill=Treatment)) + 
+  geom_line() + 
+  geom_point(shape = 21, size = 3, color="black") + 
+  xlab("Test Time") + 
+  ylab("Grooming duration (s)") + 
+  scale_fill_manual(values = c("#ADD8E6", "#00688B")) +
+  scale_color_manual(values = c("#ADD8E6", "#00688B")) +
+  theme_alex()
+ggsave("Self grooming.png", width=8, height=6, dpi=600)
+
+
+ggplot(data = beverly, aes(x = Timepoint, y = Urine_area, group = ID, color = Treatment, fill=Treatment)) + 
+  geom_line() + 
+  geom_point(shape = 21, size = 3, color="black") + 
+  xlab("Test Time") + 
+  ylab("Urine area (cm2)") + 
+  scale_fill_manual(values = c("#ADD8E6", "#00688B")) +
+  scale_color_manual(values = c("#ADD8E6", "#00688B")) +
+  theme_alex()
+ggsave("Urine area.png", width=8, height=6, dpi=600)
+
+
+
+ggplot(data = beverly, aes(x = Timepoint, y = Urine_count, group = ID, color = Treatment, fill=Treatment)) + 
+  geom_line() + 
+  geom_point(shape = 21, size = 3, color="black") + 
+  xlab("Test Time") + 
+  ylab("Urine mark counts") + 
+  scale_fill_manual(values = c("#ADD8E6", "#00688B")) +
+  scale_color_manual(values = c("#ADD8E6", "#00688B")) +
+  theme_alex()
+ggsave("Urine mark counts.png", width=8, height=6, dpi=600)
+
+```
 
 
 
@@ -465,4 +676,4 @@ ggsave("Sniff Panel percent.png", width=8, height=3, dpi=600) #save panel locall
 
 ## Discussion
 
-
+# References
