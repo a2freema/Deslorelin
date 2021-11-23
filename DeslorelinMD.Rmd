@@ -3,35 +3,35 @@ title: "Effects of a GnRH agonist on giant pouched rat female sex behavior"
 date: "`r Sys.Date()`"
 author:
   - name: Beverly Lo
-    email: blo
-    corresponding_author: no
+    email: bwl39@cornell.edu
     affiliation:
       - Cornell
   - name: Bhupinder Singh
-    email: bob@example.com
+    email: bs256@cornell.edu
     affiliation: 
       - Vetschool
-    footnote: 1 # Footnote using reference
-  - name: Amit Hanandari-Levi
-    email: cat@anotheru.edu
+  - name: Amit Hanadari-Levi
+    email: XXX
     affiliation: Cornell
-    footnote:
-        - 1
+#    footnote:
+#        - 1
   - name: Jackie Berman
-    email: cat@anotheru.edu
+    email: jeb525@cornell.edu
     affiliation: Cornell
   - name: Alexandra Chaves
-    email: cat@anotheru.edu
+    email: amc565@cornell.edu
     affiliation: Cornell
   - name: Aumena Choudhry
-    email: cat@anotheru.edu
+    email: dogwood25@outlook.com
     affiliation: Cornell
-  - name: Angela Freeman
+  - name: Angela R. Freeman
+    email: afreeman@salisbury.edu
     corresponding_author: yes
     affiliation: 
       - Cornell
       - Salisbury
-  - name: Alexander Ophir
+  - name: Alexander G. Ophir
+    email: ophir@cornell.edu
     affiliation: Cornell 
 address:
   - code: Cornell
@@ -47,13 +47,11 @@ footnote:
     text: "Current email address: \\href{mailto:cat@example.com}{cat@example.com}"
 
 abstract: |
-  This is the abstract.
+  Vaginal patency is an indicator of sexual maturity; if the vagina is closed, the female is unable to copulate. Males should be particularly attentive to cues of sexual availability and females should advertise accordingly. The African giant pouched rat is unusual because females can have fully fused vaginal openings (i.e. vaginal non-patency) despite being considered ‘adults’ by other metrics. Moreover, some females reversibly close their vaginal openings. Thus, vaginal patency in the pouched rat is a ‘flexible’ reproductive state. In order to better understand the endocrinology and social behavior of the African pouched rat, we used a long-acting GnRH agonist (deslorelin) to reduce circulating estradiol and to potentially alter vaginal patency. We hypothesized the change to non-patency is caused by a reduction in estradiol. We further hypothesized scent marking behavior would differ based on female patency and circulating estradiol. We monitored patency in 16 females; half received deslorelin implants, and the other half received control implants with only vehicle. We assessed scent marking behavior in response to male urine prior to implantation, one week after implants were inserted, and 6 weeks after implantation. After 6 months of physical examination, there were no changes in patency, but the deslorelin treated females gained significantly more weight than the controls. We observed no changes in scent marking behavior. In the future, we plan to conduct hormonal assays and imaging via MRI to observe potential additional physiological effects of deslorelin.
 
-  It consists of two paragraphs.
 acknowledgements: |
-  This is an acknowledgement.
-
-  It consists of two paragraphs.
+  The authors thank the CARE staff at Cornell, in particular Wayne MacCabe and Lawrence Carlisle, for their efforts caring for the pouched rats used in this study. We also thank Drs. Ned Place, Soon Hon Cheong, Michael Sheehan,  and (XXXX) for feedback and assistance on the project. Alexandra Molina assisted in hormonal analyses. This study was funded by the Army Research Office (Grant XXXXX to AGO), DARPA (XXX to AGO) and a generous Army Educational Outreach Program Research Grant which supported BL and AC. Virbac Ltd. graciously provided vehicle implants for control animals.
+  
 keywords:
   - key
   - dictionary
@@ -74,9 +72,6 @@ output: rticles::oup_article
 #  - \usepackage{lineno} # For line numbering
 #  - \linenumbers # For line numbering
 ---
-
-
-
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -119,6 +114,20 @@ COLOR2 <- "#E9D98D"
 ```
 
 # Introduction
+Many animal species possess more highly developed chemical detection systems relative
+to humans. One such species, and the focus of this research, is the African giant pouched rat (C. ansorgei). Due to their excellent sense of smell, relatively long life spans, and low maintenance costs, African giant pouched rats have become an important tool in leading demining efforts lead by APOPO (Anti-Persoonsmijnen Ontimijende Product Ontwikkeling; a non-governmental organization). However, despite their crucial role in humanitarian efforts, little is known about this species. Beyond knowledge about their excellent sense of smell, we have yet to mount significant research into understanding their development, social behaviors, and endocrinology. 
+
+Understandably, if a female’s vagina is closed (i.e. nonpatent), the female is unable to mate. Typically, vaginal patency develops at the start of adulthood (around 21 d in mice and 40 d in rats) (Miller et al., 2002 and Mandl and Zuckerman, 1952). However, some rodents, including female African giant pouched rats, have a unique reproductive system in which they can exhibit delayed vaginal patency development well past adulthood (Weir, 1970 and Freeman et al., 2019). Females in species such as the cuis (Galea Musteloides) do not develop patency until they are within contact
+of a male (Weir, 1970). Thus, delayed patency may correlate with the female’s sexual receptivity or be influenced by environmental factors, such as availability of potential mates (Whitsett et al., 1982). In pouched rats, vaginal patency can develop significantly later than in other rodent species, in some cases for several years (3 years or more) (Freeman et al., 2019). In some species with delayed patency, pouched rats included, females exhibit the ability to become reversibly nonpatent after reaching full adult maturity (Freeman et al., 2019). This has been linked to several possible mechanisms. Species in the Hysricomorpha suborder exhibit patency changes based on the estrus cycle (Touma, 2001). In both deer mice (Peromyscus maniculatus) and Siberian hamsters  (Phodopus sungorous), patency is dependent on photoperiod, indicating patency may be regulated by seasons (Whitsett et al., 1982; Place et al., 2004). In particular, Siberian hamsters have been shown to develop patency in response to estradiol induced uterine maturation as well, with nonpatent females yielding smaller uterine horns than patent females (Place et al., 2004). In pouched rats, magnetic resonance imaging (MRI) has yielded a similar finding: nonpatent females have smaller uterine horns compared to that of patent females (Freeman et al., in prep). However, pouched rats exhibit patency changes without exposure to males, photoperiod changes, or changes in the estrus cycle.
+
+Vaginal patency, and female sexual receptivity more generally, can have a profound effect on various social behaviors, including male preferences (Freeman et al., 2019). Previous research on pouched rats is very limited, but efforts to understand their mate preferences have recently been reported. Specifically, patent females displayed a preference for odor derived from males with longer anogenital distances (AGD), whereas non-patent females showed no preference (Freeman et al., 2019). Longer AGD in male rodents is thought to correlate with general competitiveness (Delbarco-Trillo et al., 2009). Longer AGDs are related to exposure to androgens in utero, where increased levels of androgens lead to longer AGD (Even, 1992; Nonneman, 1992; Ryan, 2002; vom Saal, 1978). In pouched rats, males with longer AGD showed a distinct preference for vaginally patent females over nonpatent females, while males with shorter AGD showed no preference (Freeman et al., 2019). However, although we know that patency can impact preferences when females are receiving social olfactory signals, we do not know whether patency can influence female olfactory signaling behaviors.
+
+Deslorelin, a long-acting gonadotropin releasing hormone (GnRH) agonist, is used in many species as a form of contraception to induce a pseudo-menopausal state (see Grosset, 2012; Munson, 2001). A GnRH agonist binds receptors located in the anterior pituitary and initially induces an increase in gonadotropin release, such as luteinizing hormone (LH) and folliclestimulating hormone (FSH). LH and FSH secretion stimulate the gonads to release sex steroid hormones (progesterone and estrogen for females). However, with prolonged use, the GnRH agonist will desensitize the anterior pituitary and induce negative feedback that eventually prevents the ovaries from releasing sex hormones (Grosset, 2012). In ferrets, deslorelin was subcutaneously
+implanted and was considered a suitable method of contraception (Zeeland et al., 2014). Previous studies in female cats (queens) have shown that deslorelin implantation significantly reduced the levels of estradiol in the blood even without knowledge of the cat’s estrus stage (Munson, 2001). We chose a GnRH analogue for our experiment because it offered us the ability to measure endogenous circulating estradiol and progesterone while also fulfilling the need to have a long lasting and removable method to secrete GnRH. We have previously tried to measure serum
+estradiol levels in pouched rats but were unable to collect accurate readings because the levels were too low (Allen et al., personal comm.). By using a GnRH agonist, we hoped to increase estradiol levels prior to long-term suppression via negative feedback in order to detect the circulating levels through hormone assays.
+
+This study aimed to better understand the endocrinology and social behaviors of the
+African pouched rat. We tested the hypothesis that reversion to reversible non-patency is mediated by a decrease in estradiol and that scent-marking behavior is influenced by the reproductive state of the female. We predicted that injection of deslorelin would lower estradiol levels in the long term and cause the vaginal membrane to fuse together, inducing nonpatency. We also predicted reversibly nonpatent females would have a lower frequency of scent marking behavior compared to when they were patent.
 
 
 
@@ -126,26 +135,30 @@ COLOR2 <- "#E9D98D"
 
 ### Animals
  The animals used in this study included animals captured at our field site in Morogoro, Tanzania as adults, and their descendants that were born in our captive colony.
+
+We used 16 females for Deslorelin (or saline) implantation and scent marking behavior testing. Nine females were wild-caught of unknown age and the other 7 females were born in captivity as descendants from wild-caught rats. Captive-born animals were weaned from their mothers after 2 months and were housed individually, like the rest of the colony. We conducted baseline scent marking experiments (prior to Deslorlelin implantation) on 13 of these patent females. All the animals were housed singly in
+standard rabbit cages (61 x 61 x 41 cm; Hoeltge Inc., Cincinnati, OH, U.S.A.), with males and females in separate rooms. Newspaper was used as bedding in each cage. The colony followed a 12:12 h light:dark cycle (lights off at 1400 hours Eastern Daylight Time, EDT) and was maintained at 21 °C and 45% humidity. The animals were fed Teklad F6 rodent diet (Envigo, Huntingdon, U.K.), provided water ad libitum, and given weekly treats of fruits, vegetables, or seeds. All of the work detailed here was approved by the U.S. Army Medical Research and Materiel Command (USAMRMC) Animal Care and Use Review Office (ACURO) and the Cornell Institutional Animal Care and Use Committee (IACUC).
  
 ### Implantation
-16 adult females were briefly anesthetized using isoflurane gas and then implanted with either a Deslorelin implant (n=8, Virbac,) or Vehicle implant (n=8 Virbac,) placed subcutaneously on the dorsal side of the animal just caudal to the shoulderblades and near the midline. All females were patent at the start of the experiment, except one that had reverted to non-patency one week prior to implantation. Animals were placed into two groups of 8 (4 Deslorelin and 4 Control in each group).
+16 adult females were briefly anesthetized using isoflurane gas and then implanted with either a Deslorelin implant (n=8, Virbac Ltd, Westlake, TX) or Vehicle implant (n=8, Virbac Ltd, Westlake, TX) placed subcutaneously on the dorsal side of the animal just caudal to the shoulder blades and near the midline. All females were patent at the start of the experiment, except one that had reverted to non-patency one week prior to implantation. Animals were placed into two groups of 8 (4 Deslorelin and 4 Control in each group). All implants were place on the Monday of 'week 1' (Figure 1) for each group.
+
+### Blood Collection
+
+We collected blood for serum for (future) hormone analysis. Blood was collected on
+Monday, Wednesday, and Friday on weeks 1, 2, and 6 between 9am and 12pm (Figure 1). Due to time constraints, we split the females into two groups, each with 4 control and 4 experimental females, and designated 6 of the total 12 weeks for blood collection. Approximately 1 mL of blood was collected through the tail vein using a 22g needle and syringe and was allowed to clot at room temperature. After at least one hour, we spun the blood at 2100 rpm for 30 minutes at room temperature and pipetted off the serum into a microcentrifuge tube. As needed, blood was respun at 2100 rpm for 5 minutes and any additional serum was added to the sample before storage in a -80°C freezer. 
 
 ### Physical examination
-We closely monitored vaginal patency of the female African giant pouched rats on a weekly
-basis with visual inspection assisted by a periodontal probe when the female was under anesthesia.
-We scored the measurements as either nonpatent (i.e., fused, with no opening in the skin), patent
-(i.e., unfused, with opening in the skin), or patent closed (i.e., unfused, with partial opening in the
-skin). While females were anesthetized, we weighed the rats and recorded nipple size and color.
-Nipple size was measured using a wire gauge measuring tool that included numerical
-measurements with decreasing diameter indicated by larger numbers. Nipple color was compared
-to the body color and recorded as bright pink, medium pink, or pale pink (Figure 2).
+
+We closely monitored vaginal patency of the female African giant pouched rats on a weekly basis with visual inspection assisted by a periodontal probe when the female was under anesthesia. We scored the measurements as either nonpatent (i.e., fused, with no opening in the skin), patent (i.e., unfused, with opening in the skin), or patent closed (i.e., unfused, with partial opening in the skin). While females were anesthetized, we weighed the rats and recorded nipple size and color. Nipple size was measured using a wire gauge measuring tool that included numerical measurements with decreasing diameter indicated by larger numbers. Nipple color was compared to the body color and recorded as bright pink, medium pink, or pale pink (Figure 2).
 
 ### Behavior
 Scentarking trials were completed before implantation while females were patent, and at week 2 and 6 (1 and 5 weeks post implantation, respectively). These dates were chosen to coincide with predicted changes in circulating estradiol.
 
 Male choice tests were conducted near 6 months post implantation. 
 
-## Results
+
+
+### Results
 
 #Patency
 We detected no effect of GnRH agonist on patency after 6 months of treatment. 
